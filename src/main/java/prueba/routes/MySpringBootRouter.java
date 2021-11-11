@@ -23,7 +23,7 @@ public class MySpringBootRouter extends RouteBuilder {
     	restConfiguration()
     	.component("servlet")
         .enableCORS(true)
-        .port(8180)
+        .port(8080)
         .contextPath("/api")
         .bindingMode(RestBindingMode.auto)
     	.corsHeaderProperty("Access-Control-Allow-Origin", "*")

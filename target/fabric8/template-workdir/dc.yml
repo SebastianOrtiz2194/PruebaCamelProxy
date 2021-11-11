@@ -1,0 +1,25 @@
+spec:
+  replicas: 1
+  strategy:
+    resources: # Resources for new pods
+     requests:
+        cpu: 100m
+        memory: 256Mi
+     limits:
+        cpu: 1000m
+        memory: 1000Mi
+  triggers:
+  - type: ConfigChange 
+  template:
+    spec:
+      containers:
+        - 
+          resources: # Resources for DeploymentConfig
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 256Mi
+          env:
+          - name: jortiz-dev
