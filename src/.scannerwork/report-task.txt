@@ -1,0 +1,6 @@
+projectKey=prueba-camel1
+serverUrl=http://localhost:9000
+serverVersion=9.0.1.46107
+dashboardUrl=http://localhost:9000/dashboard?id=prueba-camel1
+ceTaskId=AXvK6F4hI1X6BSBz_E4B
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AXvK6F4hI1X6BSBz_E4B
