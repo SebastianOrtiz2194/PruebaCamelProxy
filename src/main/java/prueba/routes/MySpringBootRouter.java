@@ -1,10 +1,15 @@
 package prueba.routes;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import prueba.dtos.User;
 
@@ -15,66 +20,79 @@ import prueba.dtos.User;
  */
 @Component
 public class MySpringBootRouter extends RouteBuilder {
-	private JacksonDataFormat jsonUser = new JacksonDataFormat(User.class);
+	
 
     @Override
     public void configure() {
     	
+     JacksonDataFormat jsonUser = new JacksonDataFormat(User.class);
+    
+     
+     ObjectMapper mapper = new ObjectMapper();
+     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+     
+     jsonUser.setObjectMapper(mapper);
+     
+
+    	
+
+    	
     	restConfiguration()
     	.component("servlet")
         .enableCORS(true)
-        .port(8080)
+        .port(8081)
         .contextPath("/api")
         .bindingMode(RestBindingMode.auto)
+        .clientRequestValidation(true)
     	.corsHeaderProperty("Access-Control-Allow-Origin", "*")
     	.corsHeaderProperty("Access-Control-Allow-Headers","*");
         
-    	rest("users")
-    		.get("/listar").outType(User.class)
+    	rest("users-proxy")
+    		.get("/")
     		.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
     		.produces(MediaType.APPLICATION_JSON_VALUE.toString())
     		.route()
-    		.to("sql:select * from user?dataSource=#dataSource");
+    		.setHeader("HttpMethod", constant("GET"))
+    		.setHeader("Content-Type", constant("application/json"))
+    		.setHeader("Accept", constant("application/json"))
+    		.to("http:localhost:8080/api/users/listar?bridgeEndpoint=true")	
+    		//.log("${body}")
+    		//.setBody(constant("{\"id\":1, \"name\":\"andres\"}"))
+    		/*.process(new Processor() {
+				
+				@Override
+				public void process(Exchange exchange) throws Exception {
+					// TODO Auto-generated method stub
+					exchange.getIn().setBody(new User());
+					
+				}
+			})*/
+    		//.marshal(jsonUser)
+    		.log("${body}")	
+    		.unmarshal(jsonUser)
+    		.log("${body}")
+	    	.marshal(jsonUser)
+			.log("${body}");
     	
-    	rest("users")
-			.get("/{id}").outType(User.class)
+    		
+    		
+    	
+    	
+    	rest("users-proxy")
+			.post("/").type(User.class)
 			.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
 			.produces(MediaType.APPLICATION_JSON_VALUE.toString())
 			.route()
-			.to("sql:select * from user where id=:#id?dataSource=#dataSource");
+			.setHeader("id",simple("${body.id}")).setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
+			.setHeader("HttpMethod", constant("POST"))
+			.marshal(jsonUser)
+			.to("http:localhost:8080/api/users/guardar?bridgeEndpoint=true")
+	    	.log("${body}");
+	  
+
+    		
     	
-    
-    	rest("users")
-			.post("/guardar").type(User.class)
-			.route().setHeader("id",simple("${body.id}")).setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
-			.to("sql:insert into user (id, name, age) values (:#id, :#name, :#age)?dataSource=#dataSource");
-    	
-    	rest("users")
-			.delete("/{id}").type(User.class)
-			.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
-			.produces(MediaType.APPLICATION_JSON_VALUE.toString())
-			.route()
-			.to("sql:delete from user where id=:#id?dataSource=#dataSource");
-    	
-    	rest("users")
-			.put("/{id}").type(User.class)
-			.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
-			.produces(MediaType.APPLICATION_JSON_VALUE.toString())
-			.route().setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
-			.log("${header.name}, ${header.age}")
-			.to("sql:update user set name=:#name, age=:#age where id=:#id?dataSource=#dataSource");
-    	
-    	rest("users")
-			.patch("/{id}").type(User.class)
-			.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
-			.produces(MediaType.APPLICATION_JSON_VALUE.toString())
-			.route().streamCaching()
-				.setHeader("name",simple("${body.name}"))
-				.setHeader("age",simple("${body.age}"))
-				.setHeader("CamelSqlQuery",simple("update user set params where id=:#id"))
-				.process("replaceQuery")
-				.log("${header.CamelSqlQuery}")
-				.to("sql:query?dataSource=#dataSource");
+    		
 	
     }
 
