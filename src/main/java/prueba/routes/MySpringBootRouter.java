@@ -69,9 +69,9 @@ public class MySpringBootRouter extends RouteBuilder {
 			})*/
     		//.marshal(jsonUser)
     		.log("${body}")	
-    		.unmarshal(jsonUser)
+    		.marshal(jsonUser)
     		.log("${body}")
-	    	.marshal(jsonUser)
+	    	.unmarshal(jsonUser)
 			.log("${body}");
     	
     		
@@ -83,7 +83,7 @@ public class MySpringBootRouter extends RouteBuilder {
 			.consumes(MediaType.APPLICATION_JSON_VALUE.toString())
 			.produces(MediaType.APPLICATION_JSON_VALUE.toString())
 			.route()
-			.setHeader("id",simple("${body.id}")).setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
+			//.setHeader("id",simple("${body.id}")).setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
 			.setHeader("HttpMethod", constant("POST"))
 			.marshal(jsonUser)
 			.to("http://pruebacamel-test-jortiz-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/api/users/guardar?bridgeEndpoint=true")
