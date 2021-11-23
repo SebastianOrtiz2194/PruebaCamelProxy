@@ -40,7 +40,7 @@ public class MySpringBootRouter extends RouteBuilder {
     	restConfiguration()
     	.component("servlet")
         .enableCORS(true)
-        .port(8081)
+        .port(8080)
         .contextPath("/api")
         .bindingMode(RestBindingMode.auto)
         .clientRequestValidation(true)
@@ -55,7 +55,7 @@ public class MySpringBootRouter extends RouteBuilder {
     		.setHeader(Exchange.HTTP_METHOD, constant("GET"))
     		.setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
     		.setHeader("Accept", constant("application/json"))
-    		.to("http:localhost:8080/api/users/listar?bridgeEndpoint=true")	
+    		.to("http://pruebacamel-test-jortiz-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/api/users/listar?bridgeEndpoint=true")	
     		//.log("${body}")
     		//.setBody(constant("{\"id\":1, \"name\":\"andres\"}"))
     		/*.process(new Processor() {
@@ -86,7 +86,7 @@ public class MySpringBootRouter extends RouteBuilder {
 			.setHeader("id",simple("${body.id}")).setHeader("name",simple("${body.name}")).setHeader("age",simple("${body.age}"))
 			.setHeader("HttpMethod", constant("POST"))
 			.marshal(jsonUser)
-			.to("http:localhost:8080/api/users/guardar?bridgeEndpoint=true")
+			.to("http://pruebacamel-test-jortiz-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/api/users/guardar?bridgeEndpoint=true")
 	    	.log("${body}");
 	  
 
